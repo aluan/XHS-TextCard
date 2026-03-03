@@ -3,13 +3,44 @@
  * 
  * 设计原则：
  * 1. 声明式渲染：通过 Render Options 描述期望的画布状态。
- * 2. 分层绘制：严格遵循 背景 -> 文本背景 -> 水印 -> 文本 -> 前景 -> 签名 的层级顺序。
+ * 2. 分层绘制：严格遵循 背景 -> 文本背景 -> 水印 -> 文本 -> 前景 -> 签名 -> 社交图标 的层级顺序。
  * 3. 模板隔离：具体的视觉逻辑由 TemplateDefinitions 定义，渲染器仅负责调用和基础绘图。
  * 4. 高清适配：支持 Scale 参数进行预览与高清输出的无损切换。
  */
+
+const SOCIAL_ICONS = {
+    gongzhonghao: { src: 'assets/icons/gongzhonghao.png' },
+    shipinhao: { src: 'assets/icons/shipinhao.png' },
+    xiaohongshu: { src: 'assets/icons/xiaohongshu.png' },
+    zhihu: { src: 'assets/icons/zhihu.png' },
+    douyin: { src: 'assets/icons/douyin.png' },
+    bilibili: { src: 'assets/icons/bilibili.png' }
+};
+
 class CanvasRenderer {
     constructor() {
         this.imageCache = new Map();
+        this.socialIconCanvasCache = new Map();
+        this.socialIconImageCache = new Map();
+    }
+
+    /**
+     * 预加载社交图标
+     */
+    async preloadSocialIcons(iconNames) {
+        const loadPromises = iconNames.map(async (iconName) => {
+            if (this.socialIconImageCache.has(iconName)) return;
+            const iconData = SOCIAL_ICONS[iconName];
+            if (!iconData || !iconData.src) return;
+            
+            try {
+                const img = await this.loadImage(iconData.src);
+                this.socialIconImageCache.set(iconName, img);
+            } catch (e) {
+                console.error('Failed to load social icon:', iconName, e);
+            }
+        });
+        await Promise.all(loadPromises);
     }
 
     /**
@@ -81,7 +112,13 @@ class CanvasRenderer {
             this.drawSignature(ctx, config, width, height, templateId);
         }
 
-        // 8. 辅助网格 (辅助排版对齐)
+        // 8. 绘制社交媒体图标（仅封面页）
+        if (isCover && config.hasSocialIcons && config.selectedSocialIcons) {
+            await this.preloadSocialIcons(config.selectedSocialIcons);
+            this.drawSocialIcons(ctx, config, width, height, templateId);
+        }
+
+        // 9. 辅助网格 (辅助排版对齐)
         if (config.showGrid) {
             this.drawGridLayout(ctx, textAreaRect, layouts);
         }
@@ -505,6 +542,77 @@ class CanvasRenderer {
             ctx.fillStyle = sigColor; ctx.font = `600 13px ${fontFamily}`; ctx.textAlign = 'center';
             ctx.fillText(sigText, width / 2, height - 30);
         }
+        ctx.restore();
+    }
+
+    /**
+     * 获取社交图标 Canvas（使用预加载的图片）
+     */
+    getSocialIconCanvas(iconName, size) {
+        const cacheKey = iconName + '_' + size;
+        if (this.socialIconCanvasCache.has(cacheKey)) {
+            return this.socialIconCanvasCache.get(cacheKey);
+        }
+
+        const img = this.socialIconImageCache.get(iconName);
+        if (!img) return null;
+
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+
+        // 保持比例缩放
+        const scale = Math.min(size / img.width, size / img.height);
+        const w = img.width * scale;
+        const h = img.height * scale;
+        const x = (size - w) / 2;
+        const y = (size - h) / 2;
+        
+        ctx.drawImage(img, x, y, w, h);
+        
+        this.socialIconCanvasCache.set(cacheKey, canvas);
+        return canvas;
+    }
+
+    /**
+     * 绘制社交媒体图标（统一放在右上角，图片之上）
+     */
+    drawSocialIcons(ctx, config, width, height, templateId) {
+        if (!config.hasSocialIcons || !config.selectedSocialIcons || config.selectedSocialIcons.length === 0) {
+            return;
+        }
+
+        const icons = config.selectedSocialIcons;
+        const iconSize = 20; 
+        const gap = 10;
+        const totalWidth = icons.length * iconSize + (icons.length - 1) * gap;
+        
+        // 采用极致贴边的 25px 边距，统一右上角绝对贴边
+        const edgeMargin = 25;
+        let x = width - totalWidth - edgeMargin;
+        let y = edgeMargin + (iconSize / 2); // 居中校准
+
+        ctx.save();
+        
+        // 移除全局透明度，确保 20px 的小图标足够清晰 sharp
+        ctx.globalAlpha = 1.0; 
+        
+        // 为极小图标添加微妙的投影，增强在复杂背景下的可读性（大师级细节）
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.15)';
+        ctx.shadowBlur = 4;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 1;
+        
+        icons.forEach((iconName, index) => {
+            const iconX = Math.round(x + index * (iconSize + gap));
+            const iconY = Math.round(y - iconSize / 2);
+            const iconCanvas = this.getSocialIconCanvas(iconName, iconSize);
+            if (iconCanvas) {
+                ctx.drawImage(iconCanvas, iconX, iconY, iconSize, iconSize);
+            }
+        });
+
         ctx.restore();
     }
 }

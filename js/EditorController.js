@@ -38,7 +38,8 @@ class EditorController {
             { key: 'h3Scale', type: 'range', isFloat: true },
             { key: 'hasCover', type: 'checkbox', toggle: '#cover-options-container' },
             { key: 'coverTitle', type: 'input' },
-            { key: 'coverFontSize', type: 'range', isInt: true }
+            { key: 'coverFontSize', type: 'range', isInt: true },
+            { key: 'hasSocialIcons', type: 'checkbox', toggle: '#social-icons-options' }
         ];
     }
 
@@ -315,6 +316,29 @@ class EditorController {
                 reader.readAsDataURL(file);
             });
         }
+
+        // 社交图标选择逻辑
+        document.querySelectorAll('.social-icon-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const iconId = item.dataset.icon;
+                if (!this.currentConfig.selectedSocialIcons) {
+                    this.currentConfig.selectedSocialIcons = [];
+                }
+                
+                const index = this.currentConfig.selectedSocialIcons.indexOf(iconId);
+                if (index > -1) {
+                    // 如果已选中，则移除
+                    this.currentConfig.selectedSocialIcons.splice(index, 1);
+                    item.classList.remove('selected');
+                } else {
+                    // 如果未选中，则追加到末尾（保持点击顺序）
+                    this.currentConfig.selectedSocialIcons.push(iconId);
+                    item.classList.add('selected');
+                }
+                
+                this.notifyConfigChange();
+            });
+        });
     }
 
     updateConfigAndNotify(cfg, rawValue) {
@@ -434,6 +458,13 @@ class EditorController {
                 else el.value = val || '';
             }
             this.updateUIControl(cfg, val);
+        });
+
+        // 恢复社交图标选择状态
+        const selectedIcons = this.currentConfig.selectedSocialIcons || [];
+        document.querySelectorAll('.social-icon-item').forEach(item => {
+            const isSelected = selectedIcons.includes(item.dataset.icon);
+            item.classList.toggle('selected', isSelected);
         });
     }
 

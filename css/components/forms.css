@@ -147,3 +147,48 @@
 .form-col.fixed {
   flex: 0 0 auto;
 }
+
+/* === 社交图标选择器 === */
+.social-icons-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.social-icon-item {
+  width: 100%;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #e5e5e5;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #f8f9fa;
+}
+
+.social-icon-item:hover {
+  border-color: var(--color-primary);
+  transform: scale(1.05);
+}
+
+.social-icon-item.selected {
+  border-color: var(--color-primary);
+  background: rgba(102, 126, 234, 0.1);
+}
+
+.social-icon-item img {
+  width: 60%;
+  height: 60%;
+  object-fit: contain;
+}
+
+#social-icons-options {
+  display: none;
+}
+
+#social-icons-options.active {
+  display: block;
+}
