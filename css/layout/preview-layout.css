@@ -20,7 +20,6 @@
 
 .image-container:hover {
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-  transform: translateY(-2px);
 }
 
 /* === 加载状态 === */
@@ -114,7 +113,6 @@
 }
 
 .preview-mode-grid .preview-item:hover {
-  transform: scale(0.65);
   z-index: 10;
 }
 

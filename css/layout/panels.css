@@ -258,7 +258,7 @@
 }
 
 .preview-item:hover {
-  transform: translateY(-4px);
+  /* Removed transform */
 }
 
 .preview-item-header {
@@ -329,7 +329,6 @@
 
 .preview-image-wrapper:hover {
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-  transform: scale(1.01);
 }
 
 .preview-image-wrapper .template-layer {
