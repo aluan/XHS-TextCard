@@ -141,7 +141,8 @@
   overflow-x: auto;
   overflow-y: hidden !important;
   scroll-snap-type: x mandatory;
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
+  overscroll-behavior: contain;
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
@@ -157,7 +158,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   scroll-snap-align: center;
   padding: var(--spacing-xl) 0 !important;
   box-sizing: border-box;
