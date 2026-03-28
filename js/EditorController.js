@@ -120,17 +120,29 @@ class EditorController {
     }
 
     createPickr(el, defaultColor, onChange) {
-        return Pickr.create({
-            el: el, theme: 'monolith', default: defaultColor, swatches: this.swatches,
-            components: {
-                preview: true, opacity: true, hue: true,
-                interaction: { hex: true, rgba: true, input: true, save: true }
-            },
-            strings: { save: '确定' }
-        }).on('save', (color, instance) => {
-            onChange(color);
-            instance.hide();
-        });
+        // Check if element exists (important for headless browser)
+        const element = typeof el === 'string' ? document.querySelector(el) : el;
+        if (!element) {
+            console.warn(`Pickr element not found: ${el}`);
+            return null;
+        }
+
+        try {
+            return Pickr.create({
+                el: el, theme: 'monolith', default: defaultColor, swatches: this.swatches,
+                components: {
+                    preview: true, opacity: true, hue: true,
+                    interaction: { hex: true, rgba: true, input: true, save: true }
+                },
+                strings: { save: '确定' }
+            }).on('save', (color, instance) => {
+                onChange(color);
+                instance.hide();
+            });
+        } catch (error) {
+            console.warn(`Failed to create Pickr for ${el}:`, error.message);
+            return null;
+        }
     }
 
     /**
