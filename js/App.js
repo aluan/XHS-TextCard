@@ -31,10 +31,9 @@ class App {
             }
             this.initElements();
             this.bindEvents();
-            this.loadTemplates();
+            this.loadTemplates(); // This will call applyCLIConfig after templates are loaded
             this.setDefaultText();
             this.restoreEditMode();
-            this.applyCLIConfig();
         } catch (error) {
             console.error('[App] Initialization failed:', error);
             alert('应用初始化失败，请检查浏览器插件或设置是否禁用了脚本运行。');
@@ -46,10 +45,10 @@ class App {
         if (window.CLI_CONFIG) {
             const { template, enableCover } = window.CLI_CONFIG;
 
-            // Set template
+            // Set template - will be applied after templates are loaded
             if (template && template !== this.currentTemplate) {
                 this.currentTemplate = template;
-                console.log(`[CLI] Applying template: ${template}`);
+                console.log(`[CLI] Will apply template: ${template}`);
             }
 
             // Set cover
@@ -234,13 +233,29 @@ class App {
         try {
             await this.templateManager.init();
             this.renderTemplateList();
-            
-            let lastId = this.currentTemplate;
-            try {
-                lastId = localStorage.getItem('xhs_last_template_id') || this.currentTemplate;
-            } catch (e) {}
-            
-            await this.selectTemplate(lastId);
+
+            // Check if CLI config specifies a template
+            let templateId = this.currentTemplate;
+            if (window.CLI_CONFIG && window.CLI_CONFIG.template) {
+                templateId = window.CLI_CONFIG.template;
+                console.log(`[CLI] Applying template: ${templateId}`);
+            } else {
+                // Otherwise use last saved template
+                try {
+                    templateId = localStorage.getItem('xhs_last_template_id') || this.currentTemplate;
+                } catch (e) {}
+            }
+
+            await this.selectTemplate(templateId);
+
+            // Apply cover setting from CLI config
+            if (window.CLI_CONFIG && window.CLI_CONFIG.enableCover !== undefined) {
+                const coverCheckbox = document.getElementById('has-cover');
+                if (coverCheckbox) {
+                    coverCheckbox.checked = window.CLI_CONFIG.enableCover;
+                    console.log(`[CLI] Cover enabled: ${window.CLI_CONFIG.enableCover}`);
+                }
+            }
         } catch (error) {
             console.error('[App] Failed to load templates:', error);
             this.showEmptyState(`模板初始化失败: ${error.message}`);
