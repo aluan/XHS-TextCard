@@ -253,6 +253,8 @@ class App {
                 const coverCheckbox = document.getElementById('has-cover');
                 if (coverCheckbox) {
                     coverCheckbox.checked = window.CLI_CONFIG.enableCover;
+                    // Trigger change event to update the UI
+                    coverCheckbox.dispatchEvent(new Event('change', { bubbles: true }));
                     console.log(`[CLI] Cover enabled: ${window.CLI_CONFIG.enableCover}`);
                 }
             }
