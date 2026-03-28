@@ -95,24 +95,58 @@ async function generateImages(options) {
   });
 
   try {
-    const page = await browser.newPage({
+    const context = await browser.newContext({
       viewport: { width: 1920, height: 1080 }
+    });
+    const page = await context.newPage();
+
+    // Listen for console messages
+    page.on('console', msg => {
+      const type = msg.type();
+      if (type === 'error' || type === 'warning') {
+        console.log(`   [浏览器 ${type}]: ${msg.text()}`);
+      }
+    });
+
+    // Listen for page errors
+    page.on('pageerror', error => {
+      console.log(`   [页面错误]: ${error.message}`);
     });
 
     // Load editor page
     console.log('📄 加载编辑器页面...');
-    await page.goto(editorUrl, { waitUntil: 'networkidle', timeout: 30000 });
+    await page.goto(editorUrl, { waitUntil: 'load', timeout: 30000 });
 
-    // Inject configuration
+    // Wait for all scripts to load
+    console.log('⏳ 等待页面脚本加载...');
+    await page.waitForTimeout(2000);
+
+    // Inject configuration BEFORE app initializes
     await page.evaluate((config) => {
       window.CLI_CONFIG = config;
     }, { template, enableCover });
 
+    // Manually initialize the app if DOMContentLoaded already fired
+    console.log('⏳ 初始化应用...');
+    await page.evaluate(() => {
+      // Check if app already exists
+      if (typeof window.app === 'undefined' && typeof App !== 'undefined') {
+        // Manually create and initialize app
+        window.app = new App();
+        window.app.init();
+      }
+    });
+
+    // Wait for app to be ready
+    await page.waitForTimeout(2000);
+
     // Wait for app to initialize
-    console.log('⏳ 等待应用初始化...');
+    console.log('⏳ 等待应用初始化完成...');
     await page.waitForFunction(() => {
       return typeof window.app !== 'undefined' && window.app.currentTemplate;
-    }, { timeout: 15000 });
+    }, { timeout: 30000 });
+
+    console.log('✅ 应用初始化完成');
 
     // Set markdown content
     console.log('✍️  设置 Markdown 内容...');
@@ -124,9 +158,9 @@ async function generateImages(options) {
       }
     }, markdownContent);
 
-    // Wait for preview to render
+    // Wait for preview to render with longer timeout
     console.log('⏳ 等待渲染完成...');
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(8000);
 
     // Get preview count
     const previewCount = await page.evaluate(() => {
