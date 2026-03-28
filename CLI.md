@@ -32,8 +32,6 @@ npm link
 # 使用完整命令
 xhs-textcard
 
-# 或使用简写
-xhs
 ```
 
 服务启动后会：

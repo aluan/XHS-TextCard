@@ -18,7 +18,6 @@ if (showHelp) {
 
 用法:
   xhs-textcard [选项]
-  xhs [选项]
 
 选项:
   -h, --help       显示帮助信息
@@ -30,8 +29,8 @@ if (showHelp) {
 
 示例:
   xhs-textcard              # 启动服务并打开浏览器
-  xhs --no-open             # 启动服务但不打开浏览器
-  PORT=3000 xhs             # 使用 3000 端口启动
+  xhs-textcard --no-open    # 启动服务但不打开浏览器
+  PORT=3000 xhs-textcard    # 使用 3000 端口启动
 
 更多信息: https://github.com/geekfoxcharlie/XHS-TextCard
   `);

@@ -126,14 +126,12 @@ npm install -g xhs-textcard
 
 # 启动服务���自动打开浏览器）
 xhs-textcard
-# 或使用简写
-xhs
 
 # 自定义端口
-PORT=3000 xhs
+PORT=3000 xhs-textcard
 
 # 查看帮助
-xhs --help
+xhs-textcard --help
 ```
 
 > 📖 详细文档：[CLI 使用指南](CLI.md)

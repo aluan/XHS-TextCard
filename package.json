@@ -4,8 +4,7 @@
   "description": "小红书文字卡片生成器 - Markdown 转图片 CLI 工具",
   "main": "index.js",
   "bin": {
-    "xhs-textcard": "./bin/xhs-textcard.js",
-    "xhs": "./bin/xhs-textcard.js"
+    "xhs-textcard": "./bin/xhs-textcard.js"
   },
   "scripts": {
     "start": "node bin/xhs-textcard.js",
