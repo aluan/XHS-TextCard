@@ -118,7 +118,27 @@
 
 </div>
 
-### 方式二：本地使用
+### 方式二：CLI 命令行工具 🆕
+
+```bash
+# 全局安装
+npm install -g xhs-textcard
+
+# 启动服务���自动打开浏览器）
+xhs-textcard
+# 或使用简写
+xhs
+
+# 自定义端口
+PORT=3000 xhs
+
+# 查看帮助
+xhs --help
+```
+
+> 📖 详细文档：[CLI 使用指南](CLI.md)
+
+### 方式三：本地使用
 
 ```bash
 # 1. 克隆项目
@@ -126,9 +146,10 @@ git clone https://github.com/geekfoxcharlie/XHS-TextCard.git
 cd XHS-TextCard
 
 # 2. 启动本地服务器（任选其一）
+npm start                           # Node.js CLI (推荐)
 python -m http.server 8000          # Python 3
 python -m SimpleHTTPServer 8000     # Python 2
-npx serve .                         # Node.js
+npx serve .                         # npx
 
 # 3. 浏览器访问
 open http://localhost:8000/editor.html
@@ -136,7 +157,7 @@ open http://localhost:8000/editor.html
 
 > 💡 **提示**：由于浏览器安全策略，请勿直接双击 HTML 文件打开
 
-### 方式三：一键部署
+### 方式四：一键部署
 
 [![Deploy to Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/geekfoxcharlie/XHS-TextCard)
 [![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/geekfoxcharlie/XHS-TextCard)

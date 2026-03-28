@@ -11,3 +11,10 @@ AGENTS.md
 
 # Plan
 SEO_PLAN.md
+
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
