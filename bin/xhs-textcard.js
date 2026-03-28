@@ -11,6 +11,11 @@ const showHelp = args.includes('--help') || args.includes('-h');
 const showVersion = args.includes('--version') || args.includes('-v');
 const noOpen = args.includes('--no-open');
 
+// Check if generate mode
+let generateMode = false;
+let inputFile = null;
+let outputDir = null;
+
 // Parse template and cover options
 let template = 'starry-night'; // default template
 let enableCover = false; // default: no cover
@@ -22,6 +27,13 @@ for (let i = 0; i < args.length; i++) {
   if (args[i] === '--cover' || args[i] === '-c') {
     enableCover = true;
   }
+  if (args[i] === '--input' || args[i] === '-i') {
+    generateMode = true;
+    inputFile = args[i + 1];
+  }
+  if (args[i] === '--output' || args[i] === '-o') {
+    outputDir = args[i + 1];
+  }
 }
 
 // Show help
@@ -30,12 +42,19 @@ if (showHelp) {
 🎨 XHS-TextCard - 小红书文字卡片生成器 CLI
 
 用法:
-  xhs-textcard [选项]
+  xhs-textcard [选项]                    # 启动服务器模式
+  xhs-textcard -i <file> -o <dir>        # 生成图片模式
 
-选项:
+服务器模式选项:
   -h, --help              显示帮助信息
   -v, --version           显示版本号
   --no-open               启动服务但不自动打开浏览器
+  -t, --template <name>   指定模板 (默认: starry-night)
+  -c, --cover             启用封面 (默认: 不启用)
+
+生成图片模式选项:
+  -i, --input <file>      输入 Markdown 文件路径
+  -o, --output <dir>      输出图片目录路径
   -t, --template <name>   指定模板 (默认: starry-night)
   -c, --cover             启用封面 (默认: 不启用)
 
@@ -56,11 +75,16 @@ if (showHelp) {
   PORT                    自定义端口号 (默认: 8080)
 
 示例:
+  # 服务器模式
   xhs-textcard                                    # 启动服务并打开浏览器
   xhs-textcard --no-open                          # 启动服务但不打开浏览器
   xhs-textcard -t ios-memo                        # 使用苹果备忘录模板
   xhs-textcard -t notion-style -c                 # 使用效率笔记模板并启用封面
   PORT=3000 xhs-textcard -t pro-doc               # 使用 3000 端口和大厂文档模板
+
+  # 生成图片模式
+  xhs-textcard -i article.md -o ./output          # 从 Markdown 生成图片
+  xhs-textcard -i article.md -o ./output -t ios-memo -c  # 指定模板和封面
 
 更多信息: https://github.com/geekfoxcharlie/XHS-TextCard
   `);
@@ -76,6 +100,33 @@ if (showVersion) {
 
 const PORT = process.env.PORT || 8080;
 const PROJECT_ROOT = path.join(__dirname, '..');
+
+// Handle generate mode
+if (generateMode) {
+  if (!inputFile) {
+    console.error('❌ 错误: 请使用 -i 或 --input 指定输入文件');
+    process.exit(1);
+  }
+
+  if (!outputDir) {
+    console.error('❌ 错误: 请使用 -o 或 --output 指定输出目录');
+    process.exit(1);
+  }
+
+  // Run generator
+  const { generateImages } = require('./generator');
+  generateImages({
+    input: inputFile,
+    output: outputDir,
+    template,
+    enableCover
+  }).catch(error => {
+    console.error('\n❌ 生成失败:', error.message);
+    process.exit(1);
+  });
+
+  return;
+}
 
 // MIME types mapping
 const MIME_TYPES = {
