@@ -1,0 +1,37 @@
+# Development files
+.git
+.gitignore
+.DS_Store
+.vscode
+.idea
+.cursor
+
+# Test files
+test.md
+output/
+output-*/
+
+# Documentation
+AGENTS.md
+SEO_PLAN.md
+CLI.md
+
+# Build artifacts
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# Git files
+.git/
+.github/
+
+# IDE
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.log

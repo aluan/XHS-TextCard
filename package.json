@@ -1,7 +1,7 @@
 {
   "name": "xhs-textcard",
   "version": "1.3.0",
-  "description": "小红书文字卡片生成器 - Markdown 转图片 CLI 工具",
+  "description": "小红书文字卡片生成器 - 将 Markdown 转换为精美图片的 CLI 工具 | XiaoHongShu Text Card Generator - Convert Markdown to beautiful images",
   "main": "index.js",
   "bin": {
     "xhs-textcard": "./bin/xhs-textcard.js"
@@ -9,22 +9,32 @@
   "scripts": {
     "start": "node bin/xhs-textcard.js",
     "dev": "node bin/xhs-textcard.js --no-open",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepublishOnly": "echo 'Publishing xhs-textcard to npm...'"
   },
   "keywords": [
     "xiaohongshu",
+    "rednote",
     "markdown",
     "image",
     "card",
     "generator",
-    "cli"
+    "cli",
+    "markdown-to-image",
+    "text-card",
+    "social-media",
+    "content-creation"
   ],
-  "author": "geekfoxcharlie",
+  "author": "geekfoxcharlie <geekfoxcharlie@gmail.com>",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/geekfoxcharlie/XHS-TextCard.git"
+    "url": "https://github.com/aluan/XHS-TextCard.git"
   },
+  "bugs": {
+    "url": "https://github.com/aluan/XHS-TextCard/issues"
+  },
+  "homepage": "https://xhs-textcard.site",
   "dependencies": {
     "open": "^10.0.3"
   },
@@ -33,5 +43,20 @@
   },
   "engines": {
     "node": ">=14.0.0"
-  }
+  },
+  "files": [
+    "bin/",
+    "js/",
+    "css/",
+    "templates/",
+    "assets/",
+    "data/",
+    "editor.html",
+    "index.html",
+    "robots.txt",
+    "sitemap.xml",
+    "logo.png",
+    "og-image.png",
+    "rednote.png"
+  ]
 }
