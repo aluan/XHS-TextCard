@@ -1,6 +1,57 @@
-const puppeteer = require('puppeteer');
+const { chromium } = require('playwright');
 const path = require('path');
 const fs = require('fs');
+const http = require('http');
+
+/**
+ * Start a simple HTTP server
+ */
+function startServer(projectRoot, port = 0) {
+  return new Promise((resolve, reject) => {
+    const MIME_TYPES = {
+      '.html': 'text/html',
+      '.css': 'text/css',
+      '.js': 'application/javascript',
+      '.json': 'application/json',
+      '.png': 'image/png',
+      '.jpg': 'image/jpeg',
+      '.svg': 'image/svg+xml',
+      '.woff': 'font/woff',
+      '.woff2': 'font/woff2',
+      '.ttf': 'font/ttf'
+    };
+
+    const server = http.createServer((req, res) => {
+      let filePath = path.join(projectRoot, req.url === '/' ? '/editor.html' : req.url);
+
+      if (!filePath.startsWith(projectRoot)) {
+        res.writeHead(403);
+        res.end('Forbidden');
+        return;
+      }
+
+      fs.readFile(filePath, (err, data) => {
+        if (err) {
+          res.writeHead(404);
+          res.end('Not found');
+          return;
+        }
+
+        const ext = path.extname(filePath);
+        const contentType = MIME_TYPES[ext] || 'application/octet-stream';
+        res.writeHead(200, { 'Content-Type': contentType });
+        res.end(data);
+      });
+    });
+
+    server.listen(port, () => {
+      const actualPort = server.address().port;
+      resolve({ server, port: actualPort });
+    });
+
+    server.on('error', reject);
+  });
+}
 
 /**
  * Generate images from markdown file
@@ -31,25 +82,26 @@ async function generateImages(options) {
   console.log(`📄 启用封面: ${enableCover ? '是' : '否'}`);
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 
+  // Start local server
+  const projectRoot = path.join(__dirname, '..');
+  console.log('🌐 启动本地服务器...');
+  const { server, port } = await startServer(projectRoot);
+  const editorUrl = `http://localhost:${port}/editor.html`;
+  console.log(`   服务器地址: ${editorUrl}`);
+
   console.log('🚀 启动浏览器...');
-  const browser = await puppeteer.launch({
-    headless: 'new',
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
+  const browser = await chromium.launch({
+    headless: true
   });
 
   try {
-    const page = await browser.newPage();
-
-    // Set viewport size
-    await page.setViewport({ width: 1920, height: 1080 });
-
-    // Get project root
-    const projectRoot = path.join(__dirname, '..');
-    const editorPath = `file://${path.join(projectRoot, 'editor.html')}`;
+    const page = await browser.newPage({
+      viewport: { width: 1920, height: 1080 }
+    });
 
     // Load editor page
     console.log('📄 加载编辑器页面...');
-    await page.goto(editorPath, { waitUntil: 'networkidle0', timeout: 30000 });
+    await page.goto(editorUrl, { waitUntil: 'networkidle', timeout: 30000 });
 
     // Inject configuration
     await page.evaluate((config) => {
@@ -57,7 +109,10 @@ async function generateImages(options) {
     }, { template, enableCover });
 
     // Wait for app to initialize
-    await page.waitForFunction(() => window.app && window.app.currentTemplate, { timeout: 10000 });
+    console.log('⏳ 等待应用初始化...');
+    await page.waitForFunction(() => {
+      return typeof window.app !== 'undefined' && window.app.currentTemplate;
+    }, { timeout: 15000 });
 
     // Set markdown content
     console.log('✍️  设置 Markdown 内容...');
@@ -71,7 +126,7 @@ async function generateImages(options) {
 
     // Wait for preview to render
     console.log('⏳ 等待渲染完成...');
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(5000);
 
     // Get preview count
     const previewCount = await page.evaluate(() => {
@@ -114,6 +169,7 @@ async function generateImages(options) {
 
   } finally {
     await browser.close();
+    server.close();
   }
 }
 
