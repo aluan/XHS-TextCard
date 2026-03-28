@@ -34,9 +34,32 @@ class App {
             this.loadTemplates();
             this.setDefaultText();
             this.restoreEditMode();
+            this.applyCLIConfig();
         } catch (error) {
             console.error('[App] Initialization failed:', error);
             alert('应用初始化失败，请检查浏览器插件或设置是否禁用了脚本运行。');
+        }
+    }
+
+    applyCLIConfig() {
+        // Apply CLI configuration if available
+        if (window.CLI_CONFIG) {
+            const { template, enableCover } = window.CLI_CONFIG;
+
+            // Set template
+            if (template && template !== this.currentTemplate) {
+                this.currentTemplate = template;
+                console.log(`[CLI] Applying template: ${template}`);
+            }
+
+            // Set cover
+            if (enableCover !== undefined) {
+                const coverCheckbox = document.getElementById('has-cover');
+                if (coverCheckbox) {
+                    coverCheckbox.checked = enableCover;
+                    console.log(`[CLI] Cover enabled: ${enableCover}`);
+                }
+            }
         }
     }
 
