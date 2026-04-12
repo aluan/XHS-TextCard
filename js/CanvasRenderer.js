@@ -329,6 +329,7 @@ class CanvasRenderer {
         ctx.translate(width / 2, height / 2);
         ctx.rotate(-Math.PI / 6);
         const text = config.watermarkText || DEFAULT_BRAND_TEXT;
+        if (!text) { ctx.restore(); return; }
         for (let x = -width; x < width; x += 180) {
             for (let y = -height; y < height; y += 120) {
                 ctx.fillText(text, x, y);
@@ -480,6 +481,7 @@ class CanvasRenderer {
 
     drawSignature(ctx, config, width, height, templateId) {
         const sigText = config.signatureText || DEFAULT_BRAND_TEXT;
+        if (!sigText) { return; }
         const sigColor = config.signatureColor || '#555555';
         const sigStyle = config.signatureStyle || 'modern-pill';
         const fontFamily = config.fontFamily === 'inherit' ? "-apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', sans-serif" : (config.fontFamily || "sans-serif");
